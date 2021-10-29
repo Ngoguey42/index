@@ -1,3 +1,31 @@
+type fds = {
+  filenames : (Unix.file_descr, string list) Hashtbl.t;
+  bytes_read : (Unix.file_descr, int64) Hashtbl.t;
+}
+
+let fds = { filenames = Hashtbl.create 256; bytes_read = Hashtbl.create 256 }
+
+let register_filename fd fname =
+  let l =
+    match Hashtbl.find_opt fds.filenames fd with None -> [] | Some l -> l
+  in
+  Hashtbl.replace fds.filenames fd (fname :: l)
+
+let register_bytes_read fd c =
+  let i =
+    match Hashtbl.find_opt fds.bytes_read fd with None -> 0L | Some i -> i
+  in
+  Hashtbl.replace fds.bytes_read fd (Int64.add i c)
+
+let print_fds () =
+  Hashtbl.iter
+    (fun fd l ->
+      let i =
+        match Hashtbl.find_opt fds.bytes_read fd with None -> 0L | Some i -> i
+      in
+      Fmt.epr "%a - %Ld bytes read\n%!" Fmt.(list ~sep:comma string) l i)
+    fds.filenames
+
 open! Import
 module Stats = Index.Stats
 
@@ -42,6 +70,7 @@ let unsafe_write t ~off buffer buffer_offset length =
 let unsafe_read t ~off ~len buf =
   let n = really_read t.fd off len buf in
   Stats.add_read n;
+  register_bytes_read t.fd (Int64.of_int n);
   n
 
 let encode_int63 n =

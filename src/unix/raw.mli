@@ -59,3 +59,7 @@ module Header : sig
   val set : raw -> t -> unit
 end
 with type raw := t
+
+val print_fds : unit -> unit
+val register_filename : Unix.file_descr -> string -> unit
+(* val register_bytes_read : Unix.file_descr -> int -> unit *)
