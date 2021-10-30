@@ -386,7 +386,19 @@ struct
           let proportion = (target_in -. low_in) /. (high_in -. low_in) in
           (* Convert fractional position to position in output space *)
           let position = low_out +. (proportion *. (high_out -. low_out)) in
-          let rounded = ceil (position -. 0.5) +. 0.5 in
+          let rounded = Float.round position in
+          let t0 = target_in < low_in in
+          let t1 = target_in > high_in in
+          let t2 = rounded < low_out in
+          let t3 = rounded > high_out in
+          if t0 || t1 || t2 || t3 then
+            Fmt.failwith
+              "%b %b %b %b low_in %.0f high_in %.0f low_out %.0f high_out %.0f \
+               target_in %.0f target_out %.0f proportion %f position %f"
+              t0 t1 t2 t3 low_in high_in low_out high_out target_in rounded
+
+        proportion position
+              ;
           Int63.of_float rounded
       end)
 
