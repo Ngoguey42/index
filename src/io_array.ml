@@ -48,6 +48,7 @@ module Make (IO : Io.S) (Elt : ELT) :
   let v io = { io; buffer = None }
 
   let get_entry_from_io io off =
+    if true then assert false;
     let buf = Bytes.create Elt.encoded_size in
     let n = IO.read io ~off ~len:Elt.encoded_size buf in
     assert (n = Elt.encoded_size);
@@ -92,14 +93,16 @@ module Make (IO : Io.S) (Elt : ELT) :
 
   let pre_fetch t ~low ~high =
     let range = Elt.encoded_size * (1 + Int63.(to_int_exn (high - low))) in
-    if Int63.compare low high > 0 then
+    if Int63.compare low high > 0 then (
+      if true then assert false;
       Log.warn (fun m ->
           m "Requested pre-fetch region is empty: [%a, %a]" Int63.pp low
-            Int63.pp high)
-    else if range > max_buffer_size then
+            Int63.pp high))
+    else if range > max_buffer_size then (
+      if true then assert false;
       Log.warn (fun m ->
           m "Requested pre-fetch [%a, %a] is larger than %d" Int63.pp low
-            Int63.pp high max_buffer_size)
+            Int63.pp high max_buffer_size))
     else
       match t.buffer with
       | Some b ->
@@ -114,6 +117,7 @@ module Make (IO : Io.S) (Elt : ELT) :
                    [%a, %a]"
                   Int63.pp low_buf Int63.pp high_buf Int63.pp low Int63.pp high)
           else (
+            if true then assert false;
             Log.warn (fun m ->
                 m
                   "Current buffer [%a, %a] insufficient. Prefetching in range \
