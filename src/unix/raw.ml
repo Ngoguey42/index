@@ -10,6 +10,7 @@ let v fd = { fd }
 let really_write fd fd_offset buffer buffer_offset length =
   let rec aux fd_offset buffer_offset length =
     let w = Syscalls.pwrite ~fd ~fd_offset ~buffer ~buffer_offset ~length in
+    Stats.add_write w;
     if w = 0 || w = length then ()
     else
       (aux [@tailcall])
@@ -21,6 +22,7 @@ let really_write fd fd_offset buffer buffer_offset length =
 let really_read fd fd_offset length buffer =
   let rec aux fd_offset buffer_offset length =
     let r = Syscalls.pread ~fd ~fd_offset ~buffer ~buffer_offset ~length in
+    Stats.add_read r;
     if r = 0 then buffer_offset (* end of file *)
     else if r = length then buffer_offset + r
     else
@@ -36,12 +38,10 @@ let fstat t = Unix.fstat t.fd
 
 let unsafe_write t ~off buffer buffer_offset length =
   let buffer = Bytes.unsafe_of_string buffer in
-  really_write t.fd off buffer buffer_offset length;
-  Stats.add_write length
+  really_write t.fd off buffer buffer_offset length
 
 let unsafe_read t ~off ~len buf =
   let n = really_read t.fd off len buf in
-  Stats.add_read n;
   n
 
 let encode_int63 n =
