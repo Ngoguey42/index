@@ -89,4 +89,6 @@ let import ~hash_size buf =
   let size = int_of_float (log2 (float_of_int nb_fans)) in
   let shift = hash_size - size in
   let mask = (nb_fans - 1) lsl shift in
+  Printf.eprintf "hash_size:%d nb_fans:%d size:%d shift:%d mask:%d\n%!"
+    hash_size nb_fans size shift mask;
   { fans; mask; shift }
